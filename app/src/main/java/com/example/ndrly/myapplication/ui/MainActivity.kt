@@ -9,11 +9,13 @@ import android.widget.Toast
 import com.example.ndrly.myapplication.R
 import com.example.ndrly.myapplication.adapter.MoviesAdapter
 import com.example.ndrly.myapplication.beans.Response
+import com.example.ndrly.myapplication.constant.Constant.Companion.API_SORT_QUERY
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : Activity(), MainViewInterface {
 
     val TAG = "MV_MAIN_ACT"
+    var PAGE = 1
 
     lateinit var adapter: RecyclerView.Adapter<MoviesAdapter.MoviesHolder>
     lateinit var presenter: MainPresenter
@@ -24,7 +26,7 @@ class MainActivity : Activity(), MainViewInterface {
 
         setupMVP()
         setupViews()
-        getMovies()
+        getMovies(API_SORT_QUERY, PAGE)
     }
 
     override fun showToast(s: String) {
@@ -53,10 +55,25 @@ class MainActivity : Activity(), MainViewInterface {
     }
 
     private fun setupViews() {
-        rvMovies?.layoutManager = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
+        val isLoading = false
+        rvMovies?.layoutManager = layoutManager
+        rvMovies?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                if (visibleItemCount + pastVisibleItems >= totalItemCount && !isLoading) {
+                    getMovies(API_SORT_QUERY, PAGE++)
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        })
     }
 
-    private fun getMovies() {
-        presenter.getMovies()
+    private fun getMovies(sortQuery: String, page: Int) {
+        presenter.getMovies(sortQuery, page)
     }
 }

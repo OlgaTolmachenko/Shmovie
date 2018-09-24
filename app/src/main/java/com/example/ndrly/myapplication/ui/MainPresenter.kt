@@ -20,13 +20,13 @@ class MainPresenter(val view: MainViewInterface): MainPresenterInterface {
 
     val TAG: String = "MV_MAIN_PRES"
 
-    override fun getMovies() {
-        getObservable().subscribeWith(getObserver())
+    override fun getMovies(sortQuery: String, page: Int) {
+        getObservable(sortQuery, page).subscribeWith(getObserver())
     }
 
-    fun getObservable(): Observable<Response> {
+    fun getObservable(sortQuery: String, page: Int): Observable<Response> {
         return NetworkClient.getRetrofit().create(NetworkInterface::class.java)
-                .getMovies(API_SORT_QUERY, API_KEY)
+                .getMovies(sortQuery, API_KEY, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
     }
